@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
-import { Plus, Trash2, Copy, CheckCircle, Clock, X } from 'lucide-react'
+import { Plus, Trash2, Copy, CheckCircle, Clock, X, Users } from 'lucide-react'
 import { Guest } from '@/lib/auth-types'
 
 export default function GuestManagementPage() {
@@ -134,9 +134,18 @@ export default function GuestManagementPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="font-serif text-2xl text-forest-dark">Gästeverwaltung</h1>
-          <div className="flex items-center gap-3">
-            <a
+          <h1 className="text-2xl font-bold text-gray-900">Guest Management</h1>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <Plus />
+            Add Guest
+          </button>
+        </div>
+      </header>
+      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="max-w-7xl mx-auto px-6 py-12">
               href="/admin/change-password"
               className="flex items-center gap-2 px-4 py-2 text-terracotta hover:bg-terracotta/10 rounded-lg transition-colors text-sm font-medium"
             >
