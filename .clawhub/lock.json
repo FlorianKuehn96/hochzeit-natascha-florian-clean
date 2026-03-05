@@ -24,6 +24,10 @@
     "duckduckgo-search": {
       "version": "1.0.0",
       "installedAt": 1772567921954
+    },
+    "opencode-controller": {
+      "version": "1.0.0",
+      "installedAt": 1772724078947
     }
   }
 }
