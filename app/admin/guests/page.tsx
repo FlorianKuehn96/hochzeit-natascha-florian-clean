@@ -48,33 +48,39 @@ export default function GuestManagementPage() {
 
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('[handleAddGuest] Starting...')
     setError(null)
     setIsSubmitting(true)
 
     try {
+      console.log('[handleAddGuest] Sending POST to /api/admin/guests')
       const response = await fetch('/api/admin/guests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // Send cookies
+        credentials: 'include',
         body: JSON.stringify({
           name: newGuest.name,
           email: newGuest.email,
           code: newGuest.code || undefined,
         }),
       })
+      console.log('[handleAddGuest] Response status:', response.status)
 
       if (!response.ok) {
         const data = await response.json()
+        console.error('[handleAddGuest] Error response:', data)
         throw new Error(data.error || 'Gast konnte nicht erstellt werden')
       }
 
       const data = await response.json()
+      console.log('[handleAddGuest] Success:', data)
       setGuests([data.guest, ...guests])
       setNewGuest({ name: '', email: '', code: '' })
       setShowAddForm(false)
     } catch (err) {
+      console.error('[handleAddGuest] Exception:', err)
       setError(err instanceof Error ? err.message : 'Fehler beim Erstellen')
     } finally {
       setIsSubmitting(false)
