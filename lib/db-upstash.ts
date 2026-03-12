@@ -91,24 +91,39 @@ export async function getGuestByEmail(email: string): Promise<Guest | null> {
 
 export async function getAllGuests(): Promise<Guest[]> {
   try {
+    console.log('[Redis getAllGuests] Starting...')
     const codes = await redis.smembers(KEYS.GUEST_LIST())
-    if (!codes || codes.length === 0) return []
+    console.log('[Redis getAllGuests] Found codes:', codes)
+    
+    if (!codes || codes.length === 0) {
+      console.log('[Redis getAllGuests] No guests found')
+      return []
+    }
 
     const guests: Guest[] = []
     for (const code of codes) {
+      console.log(`[Redis getAllGuests] Fetching guest: ${code}`)
       const data = await redis.get(KEYS.GUEST(code as string))
+      console.log(`[Redis getAllGuests] Data for ${code}:`, data ? 'found' : 'not found')
       if (data) {
-        guests.push(JSON.parse(data as string))
+        try {
+          const guest = JSON.parse(data as string)
+          guests.push(guest)
+        } catch (e) {
+          console.error(`[Redis getAllGuests] Parse error for ${code}:`, e)
+        }
       }
     }
 
+    console.log(`[Redis getAllGuests] Returning ${guests.length} guests`)
+    
     // Sort by created date descending
     return guests.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )
   } catch (error) {
-    console.error('Error fetching all guests:', error)
+    console.error('[Redis getAllGuests] Error:', error)
     return []
   }
 }
