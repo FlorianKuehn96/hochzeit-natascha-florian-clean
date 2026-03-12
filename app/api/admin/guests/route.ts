@@ -29,7 +29,10 @@ async function verifyAdminToken(request: NextRequest): Promise<boolean> {
  * Get all guests (admin only)
  */
 export async function GET(request: NextRequest) {
+  console.log('[API GET /admin/guests] Starting request')
+  
   if (!(await verifyAdminToken(request))) {
+    console.log('[API GET /admin/guests] Unauthorized')
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -37,10 +40,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const guests = await getAllGuests()  // <-- FIX: Added await
+    console.log('[API GET /admin/guests] Fetching guests from DB...')
+    const guests = await getAllGuests()
+    console.log(`[API GET /admin/guests] Found ${guests.length} guests`)
     return NextResponse.json({ guests })
   } catch (error) {
-    console.error('Get guests error:', error)
+    console.error('[API GET /admin/guests] Error:', error)
     return NextResponse.json(
       { error: 'Fehler beim Abrufen der Gästeliste' },
       { status: 500 }
@@ -53,7 +58,10 @@ export async function GET(request: NextRequest) {
  * Create new guest (admin only)
  */
 export async function POST(request: NextRequest) {
+  console.log('[API POST /admin/guests] Starting request')
+  
   if (!(await verifyAdminToken(request))) {
+    console.log('[API POST /admin/guests] Unauthorized')
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -62,10 +70,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
+    console.log('[API POST /admin/guests] Request body:', body)
+    
     const { name, email, code: customCode } = body
 
     // Validation
     if (!name || !email) {
+      console.log('[API POST /admin/guests] Validation failed - missing name or email')
       return NextResponse.json(
         { error: 'Name und E-Mail erforderlich' },
         { status: 400 }
@@ -74,13 +85,16 @@ export async function POST(request: NextRequest) {
 
     // Generate code if not provided
     const code = customCode || generateGuestCode('readable')
+    console.log(`[API POST /admin/guests] Creating guest: ${name}, ${email}, code: ${code}`)
 
     // Create guest
-    const guest = await createGuest({  // <-- FIX: Added await
+    const guest = await createGuest({
       name,
       email,
       code,
     })
+    
+    console.log('[API POST /admin/guests] Guest created:', guest)
 
     return NextResponse.json(
       {
@@ -90,7 +104,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error: any) {
-    console.error('Create guest error:', error)
+    console.error('[API POST /admin/guests] Error:', error)
 
     if (error.message?.includes('UNIQUE') || error.message?.includes('already exists')) {
       return NextResponse.json(
@@ -100,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Gast konnte nicht erstellt werden' },
+      { error: 'Gast konnte nicht erstellt werden', details: error.message },
       { status: 500 }
     )
   }
@@ -111,6 +125,8 @@ export async function POST(request: NextRequest) {
  * Delete guest by code (admin only)
  */
 export async function DELETE(request: NextRequest) {
+  console.log('[API DELETE /admin/guests] Starting request')
+  
   if (!(await verifyAdminToken(request))) {
     return NextResponse.json(
       { error: 'Unauthorized' },
@@ -129,7 +145,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const deleted = await deleteGuest(code)  // <-- FIX: Added await
+    const deleted = await deleteGuest(code)
     if (!deleted) {
       return NextResponse.json(
         { error: 'Gast nicht gefunden' },
@@ -141,7 +157,7 @@ export async function DELETE(request: NextRequest) {
       message: `Gast mit Code ${code} gelöscht`,
     })
   } catch (error) {
-    console.error('Delete guest error:', error)
+    console.error('[API DELETE /admin/guests] Error:', error)
     return NextResponse.json(
       { error: 'Gast konnte nicht gelöscht werden' },
       { status: 500 }
