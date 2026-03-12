@@ -19,13 +19,15 @@ export async function createGuest(data: {
   email: string
   code: string
 }): Promise<Guest> {
-  try {
-    if (hasRedisConfig) {
+  if (hasRedisConfig) {
+    try {
       return await redisDb.createGuest(data)
+    } catch (error) {
+      console.error('[DB] Redis error during createGuest:', error)
+      throw error // Don't fallback to memory - we need persistence
     }
-  } catch (error) {
-    console.error('[DB] Redis error, falling back to memory:', error)
   }
+  console.warn('[DB] No Redis config, using in-memory (data will be lost on restart)')
   return memoryDb.createGuest(data)
 }
 

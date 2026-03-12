@@ -28,11 +28,14 @@ export async function createGuest(data: {
   const id = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   const now = new Date().toISOString()
 
+  const upperCode = data.code.toUpperCase()
+  const lowerEmail = data.email.toLowerCase()
+  
   const guest: Guest = {
     id,
     name: data.name,
-    email: data.email,
-    code: data.code,
+    email: lowerEmail,
+    code: upperCode,
     rsvp: {
       status: 'pending',
     },
@@ -40,9 +43,9 @@ export async function createGuest(data: {
   }
 
   // Store in Redis
-  await redis.set(KEYS.GUEST(data.code), JSON.stringify(guest))
-  await redis.set(KEYS.GUEST_EMAIL(data.email), JSON.stringify(guest))
-  await redis.sadd(KEYS.GUEST_LIST(), data.code)
+  await redis.set(KEYS.GUEST(upperCode), JSON.stringify(guest))
+  await redis.set(KEYS.GUEST_EMAIL(lowerEmail), JSON.stringify(guest))
+  await redis.sadd(KEYS.GUEST_LIST(), upperCode)
 
   return guest
 }
