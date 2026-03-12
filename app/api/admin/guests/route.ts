@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const guests = getAllGuests()
+    const guests = await getAllGuests()  // <-- FIX: Added await
     return NextResponse.json({ guests })
   } catch (error) {
     console.error('Get guests error:', error)
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const code = customCode || generateGuestCode('readable')
 
     // Create guest
-    const guest = createGuest({
+    const guest = await createGuest({  // <-- FIX: Added await
       name,
       email,
       code,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Create guest error:', error)
 
-    if (error.message?.includes('UNIQUE')) {
+    if (error.message?.includes('UNIQUE') || error.message?.includes('already exists')) {
       return NextResponse.json(
         { error: 'E-Mail oder Code existiert bereits' },
         { status: 409 }
@@ -129,7 +129,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const deleted = deleteGuest(code)
+    const deleted = await deleteGuest(code)  // <-- FIX: Added await
     if (!deleted) {
       return NextResponse.json(
         { error: 'Gast nicht gefunden' },
