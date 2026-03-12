@@ -4,9 +4,26 @@ import { Guest, Admin } from './auth-types'
 import bcrypt from 'bcryptjs'
 
 // Initialize Redis client from env
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+console.log('[Redis] URL configured:', !!redisUrl)
+console.log('[Redis] Token configured:', !!redisToken)
+
+if (!redisUrl || !redisToken) {
+  throw new Error('[Redis] Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN')
+}
+
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: redisUrl,
+  token: redisToken,
+})
+
+// Test Redis connection
+redis.ping().then(() => {
+  console.log('[Redis] Connection successful')
+}).catch((err) => {
+  console.error('[Redis] Connection failed:', err)
 })
 
 // Key prefixes for organization
