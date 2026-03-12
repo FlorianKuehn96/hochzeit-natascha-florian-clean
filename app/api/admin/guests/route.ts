@@ -6,14 +6,22 @@ import { generateGuestCode } from '@/lib/auth-utils'
 export const dynamic = 'force-dynamic'
 
 async function verifyAdminToken(request: NextRequest): Promise<boolean> {
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    return false
+  // Try cookie first (new auth)
+  const sessionCookie = request.cookies.get('hochzeit_session')
+  if (sessionCookie?.value) {
+    const session = await parseSessionToken(sessionCookie.value)
+    return session?.role === 'admin'
   }
 
-  const token = authHeader.slice(7)
-  const session = await parseSessionToken(token)
-  return session?.role === 'admin'
+  // Fallback to Bearer token (legacy/SPA auth)
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7)
+    const session = await parseSessionToken(token)
+    return session?.role === 'admin'
+  }
+
+  return false
 }
 
 /**
