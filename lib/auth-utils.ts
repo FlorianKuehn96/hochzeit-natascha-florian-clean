@@ -1,9 +1,13 @@
 // Auth Utilities & Helper Functions
 
 import { AuthSession } from './auth-types'
+import { SignJWT, jwtVerify } from 'jose'
 
-const SESSION_KEY = 'hochzeit_auth_session'
-const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000 // 30 days
+// JWT Secret from environment variable (required)
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required')
+}
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 /**
  * Generate a random guest code (format: ABC123XYZ789)
@@ -28,96 +32,65 @@ export function generateGuestCode(format: 'simple' | 'readable' = 'readable'): s
 }
 
 /**
- * Create a session JWT token
- * TODO: Replace with actual JWT library (jsonwebtoken)
+ * Create a session JWT token using jose
  */
-export function createSessionToken(session: AuthSession): string {
-  // Placeholder - will use jsonwebtoken in production
-  const payload = {
-    ...session,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(session.expiresAt / 1000),
-  }
-  return Buffer.from(JSON.stringify(payload)).toString('base64')
+export async function createSessionToken(session: AuthSession): Promise<string> {
+  return new SignJWT({ ...session })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(session.expiresAt / 1000))
+    .sign(JWT_SECRET)
 }
 
 /**
- * Parse & validate session token
+ * Parse & validate session token using jose
  */
-export function parseSessionToken(token: string): AuthSession | null {
+export async function parseSessionToken(token: string): Promise<AuthSession | null> {
   try {
-    const decoded = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'))
-    
-    // Check expiration
-    if (decoded.expiresAt < Date.now()) {
-      return null
-    }
-    
-    return {
-      id: decoded.id,
-      role: decoded.role,
-      email: decoded.email,
-      name: decoded.name,
-      code: decoded.code,
-      expiresAt: decoded.expiresAt,
-    }
+    const { payload } = await jwtVerify(token, JWT_SECRET)
+    return payload as AuthSession
   } catch {
     return null
   }
 }
 
 /**
- * Store session in localStorage (client-side)
+ * Get current session from HTTP-only cookie
+ * Note: This must be called from server-side or API routes
+ * Client-side auth state is managed via cookie + session API
  */
-export function saveSessionToStorage(token: string): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(SESSION_KEY, token)
-}
-
-/**
- * Get session from localStorage
- */
-export function getSessionFromStorage(): string | null {
-  if (typeof window === 'undefined') return null
-  return localStorage.getItem(SESSION_KEY)
-}
-
-/**
- * Clear session from localStorage
- */
-export function clearSessionFromStorage(): void {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(SESSION_KEY)
-}
-
-/**
- * Get current session
- */
-export function getCurrentSession(): AuthSession | null {
-  const token = getSessionFromStorage()
-  if (!token) return null
+export async function getCurrentSessionFromCookie(request: Request): Promise<AuthSession | null> {
+  const cookie = request.headers.get('cookie')
+  if (!cookie) return null
+  
+  // Parse session cookie
+  const sessionMatch = cookie.match(/hochzeit_session=([^;]+)/)
+  if (!sessionMatch) return null
+  
+  const token = decodeURIComponent(sessionMatch[1])
   return parseSessionToken(token)
 }
 
 /**
- * Check if user is authenticated
+ * Check if user is authenticated (server-side)
  */
-export function isAuthenticated(): boolean {
-  return getCurrentSession() !== null
+export async function isAuthenticated(request: Request): Promise<boolean> {
+  const session = await getCurrentSessionFromCookie(request)
+  return session !== null
 }
 
 /**
- * Check if user is admin
+ * Check if user is admin (server-side)
  */
-export function isAdmin(): boolean {
-  const session = getCurrentSession()
+export async function isAdmin(request: Request): Promise<boolean> {
+  const session = await getCurrentSessionFromCookie(request)
   return session?.role === 'admin'
 }
 
 /**
- * Check if user is guest
+ * Check if user is guest (server-side)
  */
-export function isGuest(): boolean {
-  const session = getCurrentSession()
+export async function isGuest(request: Request): Promise<boolean> {
+  const session = await getCurrentSessionFromCookie(request)
   return session?.role === 'guest'
 }

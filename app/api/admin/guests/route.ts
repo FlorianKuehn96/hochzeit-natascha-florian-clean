@@ -5,14 +5,14 @@ import { generateGuestCode } from '@/lib/auth-utils'
 
 export const dynamic = 'force-dynamic'
 
-function verifyAdminToken(request: NextRequest): boolean {
+async function verifyAdminToken(request: NextRequest): Promise<boolean> {
   const authHeader = request.headers.get('authorization')
   if (!authHeader?.startsWith('Bearer ')) {
     return false
   }
 
   const token = authHeader.slice(7)
-  const session = parseSessionToken(token)
+  const session = await parseSessionToken(token)
   return session?.role === 'admin'
 }
 
@@ -21,7 +21,7 @@ function verifyAdminToken(request: NextRequest): boolean {
  * Get all guests (admin only)
  */
 export async function GET(request: NextRequest) {
-  if (!verifyAdminToken(request)) {
+  if (!(await verifyAdminToken(request))) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
  * Create new guest (admin only)
  */
 export async function POST(request: NextRequest) {
-  if (!verifyAdminToken(request)) {
+  if (!(await verifyAdminToken(request))) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
  * Delete guest by code (admin only)
  */
 export async function DELETE(request: NextRequest) {
-  if (!verifyAdminToken(request)) {
+  if (!(await verifyAdminToken(request))) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
