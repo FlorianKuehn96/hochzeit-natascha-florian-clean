@@ -3,11 +3,14 @@
 import { AuthSession } from './auth-types'
 import { SignJWT, jwtVerify } from 'jose'
 
-// JWT Secret from environment variable (required)
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required')
+// JWT Secret from environment variable
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required')
+  }
+  return new TextEncoder().encode(secret)
 }
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 /**
  * Generate a random guest code (format: ABC123XYZ789)
@@ -39,7 +42,7 @@ export async function createSessionToken(session: AuthSession): Promise<string> 
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(Math.floor(session.expiresAt / 1000))
-    .sign(JWT_SECRET)
+    .sign(getJwtSecret())
 }
 
 /**
@@ -47,8 +50,13 @@ export async function createSessionToken(session: AuthSession): Promise<string> 
  */
 export async function parseSessionToken(token: string): Promise<AuthSession | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return payload as AuthSession
+    const { payload } = await jwtVerify(token, getJwtSecret())
+    return {
+      id: payload.id as string,
+      role: payload.role as 'admin' | 'guest',
+      email: payload.email as string,
+      expiresAt: payload.expiresAt as number,
+    } as AuthSession
   } catch {
     return null
   }

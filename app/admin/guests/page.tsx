@@ -28,14 +28,9 @@ export default function GuestManagementPage() {
   }, [isAdmin, authLoading, router])
 
   const fetchGuests = async () => {
-    if (!session?.id) return
-
     try {
-      const token = localStorage.getItem('hochzeit_auth_session')
       const response = await fetch('/api/admin/guests', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'include', // Send cookies
       })
 
       if (!response.ok) {
@@ -57,13 +52,12 @@ export default function GuestManagementPage() {
     setIsSubmitting(true)
 
     try {
-      const token = localStorage.getItem('hochzeit_auth_session')
       const response = await fetch('/api/admin/guests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include', // Send cookies
         body: JSON.stringify({
           name: newGuest.name,
           email: newGuest.email,
@@ -91,13 +85,12 @@ export default function GuestManagementPage() {
     if (!confirm(`Möchtest du diesen Gast wirklich löschen?`)) return
 
     try {
-      const token = localStorage.getItem('hochzeit_auth_session')
       const response = await fetch('/api/admin/guests', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
+        credentials: 'include', // Send cookies
         body: JSON.stringify({ code }),
       })
 
@@ -135,27 +128,13 @@ export default function GuestManagementPage() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Guest Management</h1>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
-          >
-            <Plus />
-            Add Guest
-          </button>
-        </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-6 py-12">
-      <main className="max-w-7xl mx-auto px-6 py-12">
-              href="/admin/change-password"
-              className="flex items-center gap-2 px-4 py-2 text-terracotta hover:bg-terracotta/10 rounded-lg transition-colors text-sm font-medium"
-            >
-              🔐 Passwort ändern
-            </a>
+          <div className="flex items-center gap-4">
             <button
-              onClick={() => location.reload()}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
             >
-              Aktualisieren
+              <Plus />
+              Add Guest
             </button>
           </div>
         </div>
@@ -171,7 +150,9 @@ export default function GuestManagementPage() {
                 <p className="text-gray-600 text-sm">Zusagen</p>
                 <p className="text-3xl font-bold text-forest-dark mt-2">{stats.attending}</p>
               </div>
-              <span className="p-2 rounded-full bg-sage-green/20 text-sage-green"><CheckCircle className="w-6 h-6"/></span>
+              <span className="p-2 rounded-full bg-sage-green/20 text-sage-green">
+                <CheckCircle className="w-6 h-6" />
+              </span>
             </div>
           </div>
 
@@ -181,7 +162,9 @@ export default function GuestManagementPage() {
                 <p className="text-gray-600 text-sm">Absagen</p>
                 <p className="text-3xl font-bold text-forest-dark mt-2">{stats.declined}</p>
               </div>
-              <span className="p-2 rounded-full bg-red-100 text-red-700"><X className="w-6 h-6"/></span>
+              <span className="p-2 rounded-full bg-red-100 text-red-700">
+                <X className="w-6 h-6" />
+              </span>
             </div>
           </div>
 
@@ -191,7 +174,9 @@ export default function GuestManagementPage() {
                 <p className="text-gray-600 text-sm">Gesamtgäste</p>
                 <p className="text-3xl font-bold text-forest-dark mt-2">{stats.total}</p>
               </div>
-              <span className="p-2 rounded-full bg-gray-200 text-gray-600"><Users className="w-6 h-6"/></span>
+              <span className="p-2 rounded-full bg-gray-200 text-gray-600">
+                <Users className="w-6 h-6" />
+              </span>
             </div>
           </div>
         </div>
@@ -307,7 +292,7 @@ export default function GuestManagementPage() {
                     RSVP Status
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                   Anzahl
+                    Anzahl
                   </th>
                   <th scope="col" className="relative px-6 py-3">
                     <span className="sr-only">Actions</span>
@@ -346,7 +331,7 @@ export default function GuestManagementPage() {
                         </span>
                       )}
                     </td>
-                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{guest.rsvp.guests || 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{guest.rsvp.guests || 1}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-3">
                       <button
                         onClick={() => handleDeleteGuest(guest.code)}
