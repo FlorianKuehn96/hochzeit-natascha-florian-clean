@@ -4,13 +4,13 @@ import * as redisDb from './db-upstash'
 import * as memoryDb from './db-memory'
 import { Guest, Admin } from './auth-types'
 
-// Check if Redis env vars are available
-const hasRedisConfig = !!(
-  process.env.UPSTASH_REDIS_REST_URL &&
-  process.env.UPSTASH_REDIS_REST_TOKEN
-)
-
-console.log(`[DB] Using: ${hasRedisConfig ? 'Redis (Upstash)' : 'In-Memory (Fallback)'}`)
+// Check if Redis env vars are available - RUNTIME CHECK
+function hasRedisConfig(): boolean {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  console.log(`[DB Runtime Check] URL: ${url ? 'SET' : 'MISSING'}, Token: ${token ? 'SET' : 'MISSING'}`)
+  return !!(url && token)
+}
 
 // ===== GUEST OPERATIONS =====
 
@@ -19,7 +19,7 @@ export async function createGuest(data: {
   email: string
   code: string
 }): Promise<Guest> {
-  if (hasRedisConfig) {
+  if (hasRedisConfig()) {
     try {
       return await redisDb.createGuest(data)
     } catch (error) {
@@ -33,7 +33,7 @@ export async function createGuest(data: {
 
 export async function getGuestByCode(code: string): Promise<Guest | null> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.getGuestByCode(code)
     }
   } catch (error) {
@@ -44,7 +44,7 @@ export async function getGuestByCode(code: string): Promise<Guest | null> {
 
 export async function getGuestByEmail(email: string): Promise<Guest | null> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.getGuestByEmail(email)
     }
   } catch (error) {
@@ -55,7 +55,7 @@ export async function getGuestByEmail(email: string): Promise<Guest | null> {
 
 export async function getAllGuests(): Promise<Guest[]> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.getAllGuests()
     }
   } catch (error) {
@@ -75,7 +75,7 @@ export async function updateGuestRSVP(
   }
 ): Promise<Guest | null> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.updateGuestRSVP(code, rsvp)
     }
   } catch (error) {
@@ -86,7 +86,7 @@ export async function updateGuestRSVP(
 
 export async function deleteGuest(code: string): Promise<boolean> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.deleteGuest(code)
     }
   } catch (error) {
@@ -109,7 +109,7 @@ export async function createAdmin(data: {
   }
   
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       const result = await redisDb.createAdmin(normalizedData)
       // Also update memory to keep fallback in sync
       await memoryDb.createAdmin(normalizedData)
@@ -125,7 +125,7 @@ export async function createAdmin(data: {
 export async function getAdminByEmail(email: string): Promise<Admin | null> {
   const normalizedEmail = email.toLowerCase()
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       const admin = await redisDb.getAdminByEmail(normalizedEmail)
       // If not in Redis, try memory (fallback)
       if (!admin) {
@@ -145,7 +145,7 @@ export async function validateAdminPassword(
 ): Promise<boolean> {
   const normalizedEmail = email.toLowerCase()
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       // First try Redis
       const isValid = await redisDb.validateAdminPassword(normalizedEmail, password)
       if (isValid) {
@@ -177,7 +177,7 @@ export async function updateAdminPassword(
 ): Promise<boolean> {
   const normalizedEmail = email.toLowerCase()
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       // Update in Redis
       await redisDb.createAdmin({ email: normalizedEmail, password: newPassword })
       // Also update in memory to keep them in sync
@@ -198,7 +198,7 @@ export async function updateAdminPassword(
 
 export async function getAllAdmins(): Promise<any[]> {
   try {
-    if (hasRedisConfig) {
+    if (hasRedisConfig()) {
       return await redisDb.getAllAdmins()
     }
   } catch (error) {
