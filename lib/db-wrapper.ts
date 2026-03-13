@@ -54,12 +54,14 @@ export async function getGuestByEmail(email: string): Promise<Guest | null> {
 }
 
 export async function getAllGuests(): Promise<Guest[]> {
+  // Always try Redis first - critical for data persistence
   try {
     if (hasRedisConfig()) {
       return await redisDb.getAllGuests()
     }
+    console.warn('[DB] No Redis config, using in-memory (data will be lost on restart)')
   } catch (error) {
-    console.error('[DB] Redis error, falling back to memory:', error)
+    console.error('[DB] Redis error in getAllGuests:', error)
   }
   return memoryDb.getAllGuests()
 }
