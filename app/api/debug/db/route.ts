@@ -5,9 +5,13 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+    
     const envCheck = {
-      redisUrl: process.env.UPSTASH_REDIS_REST_URL ? 'SET' : 'MISSING',
-      redisToken: process.env.UPSTASH_REDIS_REST_TOKEN ? 'SET' : 'MISSING',
+      redisUrl: redisUrl ? `${redisUrl.substring(0, 20)}...` : 'MISSING',
+      redisToken: redisToken ? `${redisToken.substring(0, 10)}...` : 'MISSING',
+      nodeEnv: process.env.NODE_ENV,
     }
     
     console.log('[Debug DB] Env check:', envCheck)
