@@ -159,7 +159,7 @@ export async function updateGuestRSVP(
       rsvp: {
         status: rsvp.status,
         guests: rsvp.guests,
-        accommodation: rsvp.accommodation,
+        accommodation: rsvp.accommodation as 'needed' | 'not-needed' | undefined,
         dietary: rsvp.dietary,
         message: rsvp.message,
         submittedAt: new Date().toISOString(),
