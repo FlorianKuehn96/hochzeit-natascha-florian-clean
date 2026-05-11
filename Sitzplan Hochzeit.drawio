@@ -52,9 +52,6 @@
         <mxCell id="eP6oSUrpUa5uZ1R7_2wj-26" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Jora" vertex="1">
           <mxGeometry height="30" width="10" x="480" y="20" as="geometry" />
         </mxCell>
-        <mxCell id="eP6oSUrpUa5uZ1R7_2wj-27" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Actor" vertex="1">
-          <mxGeometry height="30" width="10" x="780" y="30" as="geometry" />
-        </mxCell>
         <mxCell id="eP6oSUrpUa5uZ1R7_2wj-28" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Bruno" vertex="1">
           <mxGeometry height="30" width="10" x="530" y="30" as="geometry" />
         </mxCell>
