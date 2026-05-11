@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0" version="29.6.6">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:149.0) Gecko/20100101 Firefox/149.0">
   <diagram name="Seite-1" id="vMc8Sue6800UJPkPD9eY">
-    <mxGraphModel dx="992" dy="631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1089" dy="701" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -57,9 +57,6 @@
         </mxCell>
         <mxCell id="eP6oSUrpUa5uZ1R7_2wj-28" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Bruno" vertex="1">
           <mxGeometry height="30" width="10" x="530" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="eP6oSUrpUa5uZ1R7_2wj-29" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Nico" vertex="1">
-          <mxGeometry height="30" width="10" x="600" y="30" as="geometry" />
         </mxCell>
         <mxCell id="eP6oSUrpUa5uZ1R7_2wj-30" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Remi" vertex="1">
           <mxGeometry height="30" width="10" x="480" y="130" as="geometry" />
